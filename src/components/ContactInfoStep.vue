@@ -194,15 +194,18 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, onMounted } from "vue";
 import { store } from "../store.js";
 import { Api } from "../services/api.js";
 
 const selRoom = computed(() => store.state.booking.selectedRoom);
 // Initialize contact from booking state; will be overwritten if user is logged in
 const contact = reactive({ 
-  ...store.state.booking.contact,
-  phone: store.state.booking.contact?.phone || '' 
+  title: store.state.booking.contact?.title || 'Mr',
+  firstName: store.state.booking.contact?.firstName || '',
+  lastName: store.state.booking.contact?.lastName || '',
+  email: store.state.booking.contact?.email || '',
+  phone: store.state.booking.contact?.phoneNumber || '' 
 });
 
 // Login/register modal state
@@ -230,14 +233,70 @@ const totalPrice = computed(() => {
   return basePrice.value + taxAmount.value;
 });
 
-// If user is logged in, pre-fill contact fields
-if (store.state.auth?.user) {
-  const u = store.state.auth.user;
-  contact.firstName = u.firstName || contact.firstName;
-  contact.lastName = u.lastName || contact.lastName;
-  contact.email = u.email || contact.email;
-  contact.phone = u.phone || contact.phone;
-}
+// Helper function to check if a value is valid (not empty, not "string" placeholder)
+const isValidValue = (val) => {
+  return val && val !== '' && val !== 'string' && val !== '0';
+};
+
+// Fetch guest data and auto-fill form if user is logged in
+onMounted(async () => {
+  if (store.state.auth?.user) {
+    const u = store.state.auth.user;
+  console.log('Full user object:', JSON.stringify(u, null, 2));
+  console.log('User ID:', u.userId);
+    
+    // First, check if we have a guest stored in auth state
+    if (store.state.auth.guest) {
+      const g = store.state.auth.guest;
+      console.log('Using cached guest data from store:', JSON.stringify(g, null, 2));
+      if (isValidValue(g.title)) contact.title = g.title;
+      if (isValidValue(g.firstName)) contact.firstName = g.firstName;
+      if (isValidValue(g.lastName)) contact.lastName = g.lastName;
+      // Guest object may not contain email; prefer user email
+      if (u.email) contact.email = u.email;
+      if (isValidValue(g.phoneNumber)) contact.phone = g.phoneNumber;
+      console.log('Form populated from stored guest data');
+      return;
+    }
+    
+    // Fetch guest data from API using userId
+    if (u.userId) {
+      try {
+        console.log('Fetching guest data from API for userId:', u.userId);
+        const guestData = await Api.getGuestByUser(u.userId);
+        console.log('API Response - Guest data:', JSON.stringify(guestData, null, 2));
+        
+        if (guestData) {
+          // Only use values that are not placeholders
+          if (isValidValue(guestData.title)) contact.title = guestData.title;
+          if (isValidValue(guestData.firstName)) contact.firstName = guestData.firstName;
+          if (isValidValue(guestData.lastName)) contact.lastName = guestData.lastName;
+          // Guest object doesn't include email; use user's email
+          if (u.email) contact.email = u.email;
+          if (isValidValue(guestData.phoneNumber)) contact.phone = guestData.phoneNumber;
+          
+          // Store guest data for future use
+          store.setAuth({ guest: guestData });
+          console.log('Form populated from API guest data:', { 
+            title: contact.title, 
+            firstName: contact.firstName, 
+            lastName: contact.lastName, 
+            phone: contact.phone,
+            email: contact.email 
+          });
+          return;
+        }
+      } catch (e) {
+        console.error('Failed to fetch guest data:', e);
+        console.error('Error details:', e.message);
+      }
+    }
+    
+    // Fallback to email only
+    contact.email = u.email || contact.email;
+    console.log('No guest data available. Only email populated:', contact.email);
+  }
+});
 
 const isValid = computed(() => {
   return contact.firstName && 
@@ -250,7 +309,13 @@ const emit = defineEmits(['back', 'contact-submitted']);
 
 function proceedWithBooking() {
   store.setBooking({ 
-    contact: { ...contact },
+    contact: { 
+      title: contact.title,
+      firstName: contact.firstName,
+      lastName: contact.lastName,
+      email: contact.email,
+      phoneNumber: contact.phone
+    },
     totalAmount: totalPrice.value
   });
   emit('contact-submitted', contact);
@@ -271,15 +336,49 @@ async function doLoginInModal() {
   if (!login.email || !login.password) return alert('Email and password required');
   try {
     const r = await Api.login({ email: login.email, password: login.password });
+  console.log('Login response:', JSON.stringify(r, null, 2));
     store.setAuth({ token: r.token, user: r.user });
-    // populate contact from logged-in user
-    const u = r.user;
-    contact.firstName = u.firstName || contact.firstName;
-    contact.lastName = u.lastName || contact.lastName;
-    contact.email = u.email || contact.email;
-    if (u.phone) contact.phone = u.phone;
+    
+  const u = r.user;
+  console.log('Logged in user ID:', u.userId);
+    
+    // Fetch guest data using userId
+    if (u.userId) {
+      try {
+        console.log('Fetching guest data for userId:', u.userId);
+        const guestData = await Api.getGuestByUser(u.userId);
+        console.log('Guest data received:', JSON.stringify(guestData, null, 2));
+        
+        if (guestData) {
+          // Only use values that are not placeholders
+          if (isValidValue(guestData.title)) contact.title = guestData.title;
+          if (isValidValue(guestData.firstName)) contact.firstName = guestData.firstName;
+          if (isValidValue(guestData.lastName)) contact.lastName = guestData.lastName;
+          // Guest object doesn't include email; use user's email
+          if (u.email) contact.email = u.email;
+          if (isValidValue(guestData.phoneNumber)) contact.phone = guestData.phoneNumber;
+          
+          store.setAuth({ guest: guestData });
+          console.log('Form populated from guest data after login:', {
+            title: contact.title,
+            firstName: contact.firstName,
+            lastName: contact.lastName,
+            phone: contact.phone,
+            email: contact.email
+          });
+        }
+      } catch (e) {
+        console.error('Failed to fetch guest data:', e.message);
+        // Only email is available from user object
+        contact.email = u.email || contact.email;
+      }
+    }
+    
+    // Ensure email is populated
+    if (!contact.email) contact.email = u.email;
+    
     showLoginModal.value = false;
-    // automatically continue booking after successful login
+    // automatically continue booking after successful login if form is valid
     if (!isValid.value) return alert("Please complete all required fields.");
     proceedWithBooking();
   } catch (e) {
@@ -293,13 +392,47 @@ async function doRegisterInModal() {
     await Api.register({ email: reg.email, password: reg.password, firstName: reg.firstName, lastName: reg.lastName });
     // After successful register, attempt to login automatically
     const r = await Api.login({ email: reg.email, password: reg.password });
+  console.log('Login after registration response:', JSON.stringify(r, null, 2));
     store.setAuth({ token: r.token, user: r.user });
-    // populate contact from registered user
-    const u = r.user;
-    contact.firstName = u.firstName || contact.firstName;
-    contact.lastName = u.lastName || contact.lastName;
-    contact.email = u.email || contact.email;
-    if (u.phone) contact.phone = u.phone;
+    
+  const u = r.user;
+  console.log('User ID after registration:', u.userId);
+    
+    // Fetch guest data using userId
+    if (u.userId) {
+      try {
+        console.log('Fetching guest data for userId:', u.userId);
+        const guestData = await Api.getGuestByUser(u.userId);
+        console.log('Guest data received:', JSON.stringify(guestData, null, 2));
+        
+        if (guestData) {
+          // Only use values that are not placeholders
+          if (isValidValue(guestData.title)) contact.title = guestData.title;
+          if (isValidValue(guestData.firstName)) contact.firstName = guestData.firstName;
+          if (isValidValue(guestData.lastName)) contact.lastName = guestData.lastName;
+          // Guest object doesn't include email; use user's email
+          if (u.email) contact.email = u.email;
+          if (isValidValue(guestData.phoneNumber)) contact.phone = guestData.phoneNumber;
+          
+          store.setAuth({ guest: guestData });
+          console.log('Form populated from guest data after registration');
+        }
+      } catch (e) {
+        console.error('Failed to fetch guest data:', e.message);
+      }
+    }
+    
+    // Fallback: Use registration data if guest data is not valid
+    if (!contact.firstName) contact.firstName = reg.firstName;
+    if (!contact.lastName) contact.lastName = reg.lastName;
+    if (!contact.email) contact.email = u.email || reg.email;
+    
+    console.log('Final form values after registration:', {
+      firstName: contact.firstName,
+      lastName: contact.lastName,
+      email: contact.email
+    });
+    
     showLoginModal.value = false;
     // continue booking
     if (!isValid.value) return alert("Please complete all required fields.");

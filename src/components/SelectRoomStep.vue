@@ -2,8 +2,6 @@
 import { onMounted, ref, computed } from "vue";
 import { store } from "../store.js";
 import { Api } from "../services/api.js";
-import { useRouter } from 'vue-router';
-import StepIndicator from './StepIndicator.vue';
 import RoomCard from './RoomCard.vue';
 import LoginRegisterModal from './LoginRegisterModal.vue';
 

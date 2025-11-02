@@ -23,7 +23,7 @@ const state = reactive({
     checkOutDate: '',
     nights: 0,
     selectedRoom: null,
-    contact: { title: 'Mr', firstName: '', lastName: '', email: '' },
+    contact: { title: 'Mr', firstName: '', lastName: '', email: '', phoneNumber: '' },
     reservation: null
   },
   auth: {
@@ -50,7 +50,7 @@ export const store = {
       checkOutDate: '',
       nights: 0,
       selectedRoom: null,
-      contact: { title: 'Mr', firstName: '', lastName: '', email: '' },
+      contact: { title: 'Mr', firstName: '', lastName: '', email: '', phoneNumber: '' },
       reservation: null
     });
     saveState(state);

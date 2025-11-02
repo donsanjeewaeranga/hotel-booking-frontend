@@ -35,6 +35,7 @@ export const Api = {
   async getRoom(id) { return http(`/Rooms/${id}`); },
 
   // Guests
+  async getGuest(guestId) { return http(`/Guests/${guestId}`, { auth: true }); },
   async getGuestByUser(userId) { return http(`/Guests/user/${userId}`, { auth: true }); },
   async createGuest(payload) { return http('/Guests', { method: 'POST', body: payload, auth: true }); },
 
