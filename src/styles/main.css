@@ -1,0 +1,403 @@
+/* ========================================
+   BASE STYLES
+   ======================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: #333;
+    line-height: 1.6;
+}
+
+html, body, #app {
+    height: 100%;
+}
+
+/* ========================================
+   CSS VARIABLES
+   ======================================== */
+:root {
+    --primary-color: #000;
+    --secondary-color: #6b7280;
+    --success-color: #10b981;
+    --error-color: #ef4444;
+    --border-color: #e5e7eb;
+    --bg-light: #f9fafb;
+    --bg-light-alt: #f8f5f0;
+    --bg-medium: #e8e3db;
+    --text-primary: #333;
+    --text-secondary: #666;
+    
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    --border-radius: 8px;
+    --border-radius-lg: 10px;
+}
+
+/* ========================================
+   LAYOUT & CONTAINER
+   ======================================== */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+.text-uppercase {
+    text-transform: uppercase;
+}
+
+.text-bold {
+    font-weight: bold;
+}
+
+/* ========================================
+   HEADER & NAVIGATION
+   ======================================== */
+.header {
+    background: #000;
+    color: #fff;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1000;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.nav {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+}
+
+/* ========================================
+   HAMBURGER MENU
+   ======================================== */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 1001;
+}
+
+.menu-toggle span {
+    width: 25px;
+    height: 3px;
+    background: #fff;
+    transition: all 0.3s;
+    transform-origin: center;
+}
+
+.menu-toggle.active span:nth-child(1) {
+    transform: rotate(45deg) translate(8px, 8px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+.btn {
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+}
+
+.btn-primary {
+    background: #000;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: white;
+    color: #000;
+    border: 2px solid #000;
+}
+
+.btn-secondary:hover {
+    background: #f0f0f0;
+    border-color: #333;
+}
+
+.btn-icon {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+/* ========================================
+   FORM ELEMENTS
+   ======================================== */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.icon {
+    width: 1.2rem;
+    height: 1.2rem;
+    stroke: #333;
+}
+
+.form-input,
+select.form-input {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e0e0e0;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-input:focus,
+select.form-input:focus {
+    outline: none;
+    border-color: #000;
+}
+
+/* Single border style variant */
+input.form-input {
+    border: 1px solid #e0e0e0;
+}
+
+input.form-input:focus {
+    border-color: #000;
+}
+
+/* ========================================
+   STEPS NAVIGATION
+   ======================================== */
+.steps-section {
+    margin-top: 2rem;
+}
+
+.steps-section .container {
+    background: #f8f5f0;
+    color: #333;
+    padding: 1.5rem 2rem;
+}
+
+.steps {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.step-number {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #d0d0d0;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.step-item.active .step-number {
+    background: #000;
+    color: #fff;
+}
+
+.step-item.completed .step-number {
+    background: #000;
+    color: #fff;
+}
+
+.step-label {
+    font-size: 0.85rem;
+    color: #d0d0d0;
+    text-transform: uppercase;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.step-item.active .step-label {
+    color: #333;
+    font-weight: 600;
+}
+
+.step-item.completed .step-label {
+    color: #333;
+    font-weight: 600;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 1200px) {
+    .container {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        position: relative;
+        padding: 1rem 1.5rem;
+        z-index: 1001;
+    }
+
+    .menu-toggle {
+        display: flex;
+    }
+
+    .nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #000;
+        flex-direction: column;
+        width: 100%;
+        padding: 0;
+        gap: 0;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+        z-index: 1000;
+    }
+
+    .nav.active {
+        max-height: 300px;
+        padding: 1rem 0;
+    }
+
+    .nav-link {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        width: 100%;
+        display: block;
+    }
+
+    .nav-link:last-child {
+        border-bottom: none;
+    }
+
+    .steps-section .container {
+        padding: 1rem;
+    }
+
+    .steps {
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .step-item {
+        gap: 0.5rem;
+        flex-shrink: 1;
+        min-width: auto;
+    }
+
+    .step-number {
+        width: 1.75rem;
+        height: 1.75rem;
+        font-size: 0.8rem;
+    }
+
+    .step-label {
+        font-size: 0.75rem;
+        display: none;
+    }
+
+    .step-item.active .step-label {
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    .steps {
+        gap: 0.25rem;
+    }
+
+    .step-item {
+        gap: 0.4rem;
+    }
+
+    .step-number {
+        width: 1.5rem;
+        height: 1.5rem;
+        font-size: 0.75rem;
+    }
+
+    .steps-section .container {
+        padding: 0.75rem 1rem;
+    }
+}

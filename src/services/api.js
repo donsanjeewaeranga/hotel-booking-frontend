@@ -21,7 +21,10 @@ async function http(path, { method = 'GET', body, auth = false } = {}) {
 
 export const Api = {
   // Auth
-  async register(payload) { return http('/Auth/register', { method: 'POST', body: payload }); },
+  async register(payload, isGuest = false) {
+    const endpoint = isGuest ? '/Auth/register/guest' : '/Auth/register';
+    return http(endpoint, { method: 'POST', body: payload });
+  },
   async login(payload) { return http('/Auth/login', { method: 'POST', body: payload }); },
 
   // Rooms
