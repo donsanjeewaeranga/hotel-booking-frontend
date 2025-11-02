@@ -1,27 +1,40 @@
 <template>
   <div class="room-card">
     <div class="room-image">
-      <img src="https://picsum.photos/340/210?random=101" alt="Deluxe Room" />
-      <span class="room-badge">Popular</span>
+      <img :src="room.imageUrl || 'https://picsum.photos/340/210?random=101'" :alt="roomName" />
+      <span v-if="room.isAvailable" class="room-badge">Available</span>
     </div>
     <div class="room-content">
       <div class="room-header">
-        <h3 class="room-title text-uppercase">Room 1 Title</h3>
-        <div class="room-rating">
+        <h3 class="room-title text-uppercase">{{ roomName }}</h3>
+        <div class="room-rating" v-if="room.rating">
           <svg class="star-icon" viewBox="0 0 24 24" fill="currentColor">
             <path
               d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
             />
           </svg>
-          <span>4.5</span>
+          <span>{{ room.rating }}</span>
         </div>
       </div>
-      <p class="room-subtitle text-uppercase">Lorem ipsum dolor sit amet</p>
+      <p class="room-subtitle text-uppercase" v-if="room.roomType?.name">{{ room.roomType.name }}</p>
       <p class="room-description">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ac ex a
-        risus dapibus pharetra facilisis ac felis.
+        {{ room.description || room.roomType?.description || 'Comfortable room with modern amenities.' }}
       </p>
       <div class="room-features">
+        <span class="feature-tag" v-if="capacity">
+          <svg
+            class="feature-icon-small"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          {{ capacity }} {{ capacity === 1 ? 'Guest' : 'Guests' }}
+        </span>
         <span class="feature-tag">
           <svg
             class="feature-icon-small"
@@ -35,7 +48,7 @@
           </svg>
           Free WiFi
         </span>
-        <span class="feature-tag">
+        <span class="feature-tag" v-if="room.roomType?.hasBreakfast || room.hasBreakfast">
           <svg
             class="feature-icon-small"
             viewBox="0 0 24 24"
@@ -66,13 +79,13 @@
     </div>
     <div class="room-pricing">
       <div class="room-price">
-        <span class="price-amount">S$1,080</span>
+        <span class="price-amount">S${{ displayPrice }}</span>
         <span class="price-period">/night</span>
       </div>
       <p class="price-note">Subject to GST and charges</p>
       <button
         class="btn btn-book"
-        @click="$emit('book')"
+        @click="handleBook"
       >
         BOOK ROOM
       </button>
@@ -81,14 +94,40 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
   room: {
     type: Object,
     required: true,
   },
 });
 
-defineEmits(["book"]);
+const emit = defineEmits(["book"]);
+
+const roomName = computed(() => {
+  return props.room.name || 
+         props.room.roomType?.name || 
+         `Room ${props.room.roomNumber || ''}` || 
+         'Standard Room';
+});
+
+const displayPrice = computed(() => {
+  return props.room.price || 
+         props.room.roomType?.basePrice || 
+         props.room.pricePerNight || 
+         120;
+});
+
+const capacity = computed(() => {
+  return props.room.capacity || 
+         props.room.roomType?.capacity || 
+         null;
+});
+
+function handleBook() {
+  emit('book', props.room);
+}
 </script>
 
 <style scoped>

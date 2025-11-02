@@ -5,18 +5,36 @@ const BASE = (typeof window !== 'undefined' && window.__API_BASE__) || import.me
 
 async function http(path, { method = 'GET', body, auth = false } = {}) {
   const headers = { 'Content-Type': 'application/json' };
-  if (auth && store.state.auth.token) headers['Authorization'] = `Bearer ${store.state.auth.token}`;
+  if (auth && store.state.auth.token) {
+    headers['Authorization'] = `Bearer ${store.state.auth.token}`;
+  }
+  
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined
   });
+  
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(text || `HTTP ${res.status}`);
+    let errorMessage = text || `HTTP ${res.status}`;
+    
+    try {
+      const errorJson = JSON.parse(text);
+      errorMessage = 
+        errorJson.message || 
+        errorJson.error || 
+        errorJson.title || 
+        errorJson.detail ||
+        text;
+    } catch (e) {
+      // Use text as-is
+    }
+    
+    throw new Error(errorMessage);
   }
-  const ct = res.headers.get('content-type') || '';
-  return ct.includes('application/json') ? res.json() : res.text();
+  
+  return res.json();
 }
 
 export const Api = {
@@ -40,7 +58,9 @@ export const Api = {
   async createGuest(payload) { return http('/Guests', { method: 'POST', body: payload, auth: true }); },
 
   // Reservations
-  async createReservation(payload) { return http('/Reservations', { method: 'POST', body: payload, auth: true }); },
+  async createReservation(payload) {
+    return http('/Reservations', { method: 'POST', body: payload, auth: true });
+  },
   async getReservation(id) { return http(`/Reservations/${id}`, { auth: true }); },
   async getReservationsByGuest(guestId) { return http(`/Reservations/guest/${guestId}`, { auth: true }); },
   async cancelReservation(id) { return http(`/Reservations/${id}/cancel`, { method: 'PUT', auth: true }); }

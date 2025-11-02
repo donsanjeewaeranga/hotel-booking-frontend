@@ -15,21 +15,22 @@ function saveState(state) {
 
 import { reactive } from 'vue';
 
+const savedState = loadState();
+
 const state = reactive({
-  ...loadState(),
   booking: {
-    guests: 1,
-    checkInDate: '',
-    checkOutDate: '',
-    nights: 0,
-    selectedRoom: null,
-    contact: { title: 'Mr', firstName: '', lastName: '', email: '', phoneNumber: '' },
-    reservation: null
+    guests: savedState.booking?.guests ?? 1,
+    checkInDate: savedState.booking?.checkInDate ?? '',
+    checkOutDate: savedState.booking?.checkOutDate ?? '',
+    nights: savedState.booking?.nights ?? 0,
+    selectedRoom: savedState.booking?.selectedRoom ?? null,
+    contact: savedState.booking?.contact ?? { title: 'Mr', firstName: '', lastName: '', email: '', phoneNumber: '' },
+    reservation: savedState.booking?.reservation ?? null
   },
   auth: {
-    token: null,
-    user: null,
-    guest: null
+    token: savedState.auth?.token ?? null,
+    user: savedState.auth?.user ?? null,
+    guest: savedState.auth?.guest ?? null
   }
 });
 

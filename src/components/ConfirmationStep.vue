@@ -18,12 +18,14 @@ const contact = computed(() => {
     firstName: bookingContact?.firstName || '',
     lastName: bookingContact?.lastName || '',
     email: bookingContact?.email || '',
-    phone: bookingContact?.phone || ''
+    phone: bookingContact?.phoneNumber || ''
   };
 });
 
 const bookingNumber = computed(() => {
-  // Generate a random booking number for demonstration
+  const id = store.state?.booking?.reservation?.reservationId;
+  if (id) return `RES${String(id).padStart(6, '0')}`;
+  // fallback random
   return "RES" + Math.random().toString(36).substr(2, 9).toUpperCase();
 });
 

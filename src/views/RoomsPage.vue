@@ -2,11 +2,9 @@
 import { onMounted, ref, computed } from "vue";
 import { store } from "../store.js";
 import { Api } from "../services/api.js";
-import RoomCard from './RoomCard.vue';
-import LoginRegisterModal from './LoginRegisterModal.vue';
-
-const showAuthModal = ref(false);
-const selectedRoomForBooking = ref(null);
+import { useRouter } from 'vue-router';
+import BookingStep from '../components/BookingStep.vue';
+import RoomCard from '../components/RoomCard.vue';
 
 const rooms = ref([]);
 const loading = ref(false);
@@ -62,25 +60,10 @@ function normalizeRoom(room) {
   };
 }
 
-function proceedWithBooking(room) {
+function book(room) {
   const normalized = normalizeRoom(room);
   store.setBooking({ selectedRoom: normalized });
   emit('room-selected', normalized);
-}
-
-function book(room) {
-  if (!store.state.auth?.user) {
-    selectedRoomForBooking.value = room;
-    showAuthModal.value = true;
-    return;
-  }
-  proceedWithBooking(room);
-}
-
-function onAuthSuccess() {
-  if (selectedRoomForBooking.value) {
-    proceedWithBooking(selectedRoomForBooking.value);
-  }
 }
 
 const emit = defineEmits(['room-selected']);
@@ -141,11 +124,6 @@ onMounted(load);
       <div v-else>
         <RoomCard v-for="room in sortedRooms" :key="room.id || room.roomNumber" :room="room" @book="book" />
       </div>
-      
-      <LoginRegisterModal 
-        v-model:show="showAuthModal"
-        :onSuccess="onAuthSuccess"
-      />
     </div>
   </section>
 </template>
@@ -287,78 +265,5 @@ onMounted(load);
   .summary-details {
     grid-template-columns: 1fr;
   }
-}
-
-/* Auth Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: #fff;
-  padding: 1.5rem;
-  width: 480px;
-  max-width: 90vw;
-  border-radius: 8px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-}
-
-.modal h3 {
-  margin-top: 0;
-  margin-bottom: 1.5rem;
-}
-
-.modal-body {
-  margin: 1rem 0;
-}
-
-.modal-tabs {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 0.75rem;
-  border: 1px solid #e0e0e0;
-  background: #fff;
-  color: #666;
-  cursor: pointer;
-}
-
-.tab-btn.active {
-  background: #000;
-  color: #fff;
-  border-color: #000;
-}
-
-.form-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
 }
 </style>

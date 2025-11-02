@@ -6,6 +6,7 @@
         :is="currentComponent" 
         @room-selected="handleRoomSelected"
         @contact-submitted="handleContactSubmitted"
+        @booking-failed="handleBookingFailed"
         @back="handleBack"
       />
     </div>
@@ -19,6 +20,7 @@ import StepIndicator from '../components/StepIndicator.vue';
 import SelectRoomStep from '../components/SelectRoomStep.vue';
 import ContactInfoStep from '../components/ContactInfoStep.vue';
 import ConfirmationStep from '../components/ConfirmationStep.vue';
+import BookingUnsuccessful from '../components/BookingUnsuccessful.vue';
 
 const step = ref(2);
 
@@ -29,8 +31,9 @@ const currentComponent = computed(() => {
     case 3:
       return ContactInfoStep;
     case 4:
-      console.log("Returning ConfirmationStep");
       return ConfirmationStep;
+    case 5:
+      return BookingUnsuccessful;
     default:
       return SelectRoomStep;
   }
@@ -50,6 +53,10 @@ function handleBack() {
   if (step.value > 2) {
     step.value--;
   }
+}
+
+function handleBookingFailed() {
+  step.value = 5;
 }
 </script>
 

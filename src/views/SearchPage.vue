@@ -4,9 +4,46 @@ import { useRouter } from "vue-router";
 import { store } from "../store.js";
 
 const router = useRouter();
+
+// Helper function to get date in YYYY-MM-DD format
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Get tomorrow and day after tomorrow as default dates
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const dayAfterTomorrow = new Date();
+dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+
+// Only use stored dates if there's an active booking in progress (no reservation completed)
+// If reservation exists or selectedRoom is null, reset to default dates
+const hasActiveBooking = store.state.booking.selectedRoom && !store.state.booking.reservation;
+
 const guests = ref(store.state.booking.guests || 1);
-const checkInDate = ref(store.state.booking.checkInDate || "");
-const checkOutDate = ref(store.state.booking.checkOutDate || "");
+const checkInDate = ref(hasActiveBooking ? store.state.booking.checkInDate : formatDate(tomorrow));
+const checkOutDate = ref(hasActiveBooking ? store.state.booking.checkOutDate : formatDate(dayAfterTomorrow));
+
+// Today's date for min attribute on date pickers
+const today = formatDate(new Date());
+
+// When check-in date changes, automatically set checkout to checkIn + 1 day
+watch(checkInDate, (newCheckIn) => {
+  if (newCheckIn) {
+    const checkInDateObj = new Date(newCheckIn);
+    const nextDay = new Date(checkInDateObj);
+    nextDay.setDate(nextDay.getDate() + 1);
+    
+    // Only update checkout if it's not set or if it's before/equal to the new check-in
+    const currentCheckOut = checkOutDate.value ? new Date(checkOutDate.value) : null;
+    if (!currentCheckOut || currentCheckOut <= checkInDateObj) {
+      checkOutDate.value = formatDate(nextDay);
+    }
+  }
+});
 
 watch([guests, checkInDate, checkOutDate], () => {
   const nights = nightsBetween(checkInDate.value, checkOutDate.value);
@@ -82,7 +119,7 @@ function goRooms() {
                 </svg>
                 Check In
               </label>
-              <input type="date" id="checkin" class="form-input" v-model="checkInDate" required />
+              <input type="date" id="checkin" class="form-input" v-model="checkInDate" :min="today" required />
             </div>
 
             <div class="form-group">
@@ -101,7 +138,7 @@ function goRooms() {
                 </svg>
                 Check Out
               </label>
-              <input type="date" id="checkout" class="form-input" v-model="checkOutDate" required />
+              <input type="date" id="checkout" class="form-input" v-model="checkOutDate" :min="checkInDate || today" required />
             </div>
           </div>
 
