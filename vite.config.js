@@ -14,7 +14,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5039/api',
+        target: 'http://ec2-3-252-129-234.eu-west-1.compute.amazonaws.com/api',
         changeOrigin: true
       }
     }
