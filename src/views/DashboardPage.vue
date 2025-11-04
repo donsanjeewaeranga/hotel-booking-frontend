@@ -99,19 +99,19 @@
                     <span class="value">#{{ r.reservationId }}</span>
                   </div>
                   <span :class="['status-badge', getStatusClass(r.reservationStatus)]">
-                    {{ r.reservationStatus }}
+                    {{ getStatusString(r.reservationStatus).toUpperCase() }}
                   </span>
                 </div>
                 
                 <div class="reservation-body">
                   <div class="room-info">
                     <div class="room-image">
-                      <img :src="r.room?.imageUrl || 'https://picsum.photos/200/150?random=' + r.reservationId" 
-                           :alt="'Room ' + r.room?.roomNumber" />
+                      <img :src="'https://picsum.photos/200/150?random=' + r.reservationId" 
+                           :alt="'Room ' + r.roomNumber" />
                     </div>
                     <div class="room-details">
-                      <h3 class="room-name">{{ r.room?.name || r.room?.roomType?.name || 'Room ' + r.room?.roomNumber }}</h3>
-                      <p class="room-type text-uppercase">{{ r.room?.roomType?.name || 'Standard Room' }}</p>
+                      <h3 class="room-name">Room {{ r.roomNumber }}</h3>
+                      <p class="room-type text-uppercase">{{ r.roomType || 'Standard Room' }}</p>
                     </div>
                   </div>
 
@@ -150,14 +150,24 @@
                         <span class="value">{{ calculateNights(r.checkInDate, r.checkOutDate) }} night(s)</span>
                       </div>
                     </div>
-                    <div class="info-row" v-if="r.totalAmount">
+                    <div class="info-row">
+                      <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                      </svg>
+                      <div class="info-text">
+                        <span class="label">Duration</span>
+                        <span class="value">{{ r.numberOfDays || calculateNights(r.checkInDate, r.checkOutDate) }} night(s)</span>
+                      </div>
+                    </div>
+                    <div class="info-row" v-if="r.grandTotal">
                       <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="1" x2="12" y2="23"/>
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                       </svg>
                       <div class="info-text">
                         <span class="label">Total Amount</span>
-                        <span class="value">${{ r.totalAmount }}</span>
+                        <span class="value">${{ r.grandTotal }}</span>
                       </div>
                     </div>
                   </div>
@@ -203,19 +213,19 @@
                     <span class="value">#{{ r.reservationId }}</span>
                   </div>
                   <span :class="['status-badge', getStatusClass(r.reservationStatus)]">
-                    {{ r.reservationStatus }}
+                    {{ getStatusString(r.reservationStatus).toUpperCase() }}
                   </span>
                 </div>
                 
                 <div class="reservation-body">
                   <div class="room-info">
                     <div class="room-image">
-                      <img :src="r.room?.imageUrl || 'https://picsum.photos/200/150?random=' + r.reservationId" 
-                           :alt="'Room ' + r.room?.roomNumber" />
+                      <img :src="'https://picsum.photos/200/150?random=' + r.reservationId" 
+                           :alt="'Room ' + r.roomNumber" />
                     </div>
                     <div class="room-details">
-                      <h3 class="room-name">{{ r.room?.name || r.room?.roomType?.name || 'Room ' + r.room?.roomNumber }}</h3>
-                      <p class="room-type text-uppercase">{{ r.room?.roomType?.name || 'Standard Room' }}</p>
+                      <h3 class="room-name">Room {{ r.roomNumber }}</h3>
+                      <p class="room-type text-uppercase">{{ r.roomType || 'Standard Room' }}</p>
                     </div>
                   </div>
 
@@ -295,19 +305,19 @@
                     <span class="value">#{{ r.reservationId }}</span>
                   </div>
                   <span :class="['status-badge', getStatusClass(r.reservationStatus)]">
-                    {{ r.reservationStatus }}
+                    {{ getStatusString(r.reservationStatus).toUpperCase() }}
                   </span>
                 </div>
                 
                 <div class="reservation-body">
                   <div class="room-info">
                     <div class="room-image">
-                      <img :src="r.room?.imageUrl || 'https://picsum.photos/200/150?random=' + r.reservationId" 
-                           :alt="'Room ' + r.room?.roomNumber" />
+                      <img :src="'https://picsum.photos/200/150?random=' + r.reservationId" 
+                           :alt="'Room ' + r.roomNumber" />
                     </div>
                     <div class="room-details">
-                      <h3 class="room-name">{{ r.room?.name || r.room?.roomType?.name || 'Room ' + r.room?.roomNumber }}</h3>
-                      <p class="room-type text-uppercase">{{ r.room?.roomType?.name || 'Standard Room' }}</p>
+                      <h3 class="room-name">Room {{ r.roomNumber }}</h3>
+                      <p class="room-type text-uppercase">{{ r.roomType || 'Standard Room' }}</p>
                     </div>
                   </div>
 
@@ -402,6 +412,23 @@ const showCancelModal = ref(false);
 const reservationToCancel = ref(null);
 const cancelling = ref(null);
 
+// Helper function to safely get status as lowercase string
+function getStatusString(reservationStatus) {
+  if (reservationStatus === null || reservationStatus === undefined) return 'confirmed';
+  if (typeof reservationStatus === 'string') return reservationStatus.toLowerCase();
+  if (typeof reservationStatus === 'number') {
+    // Map enum values to status strings
+    const statusMap = {
+      0: 'confirmed',
+      1: 'cancelled',
+      2: 'checkedin',
+      3: 'checkedout'
+    };
+    return statusMap[reservationStatus] !== undefined ? statusMap[reservationStatus] : 'confirmed';
+  }
+  return String(reservationStatus).toLowerCase();
+}
+
 // Computed properties to filter reservations by status and date
 const upcomingReservations = computed(() => {
   const today = new Date();
@@ -409,8 +436,9 @@ const upcomingReservations = computed(() => {
   
   return reservations.value.filter(r => {
     const checkInDate = new Date(r.checkInDate);
-    const status = r.reservationStatus?.toLowerCase();
-    return (status === 'confirmed' || status === 'pending') && checkInDate >= today;
+    checkInDate.setHours(0, 0, 0, 0); // Normalize to midnight for comparison
+    const status = getStatusString(r.reservationStatus);
+    return status === 'confirmed' && checkInDate >= today;
   }).sort((a, b) => new Date(a.checkInDate) - new Date(b.checkInDate));
 });
 
@@ -420,36 +448,36 @@ const pastReservations = computed(() => {
   
   return reservations.value.filter(r => {
     const checkOutDate = new Date(r.checkOutDate);
-    const status = r.reservationStatus?.toLowerCase();
-    return (status === 'confirmed' || status === 'completed') && checkOutDate < today;
+    const status = getStatusString(r.reservationStatus);
+    return (status === 'checkedin' || status === 'checkedout') && checkOutDate < today;
   }).sort((a, b) => new Date(b.checkOutDate) - new Date(a.checkOutDate));
 });
 
 const cancelledReservations = computed(() => {
   return reservations.value.filter(r => {
-    const status = r.reservationStatus?.toLowerCase();
+    const status = getStatusString(r.reservationStatus);
     return status === 'cancelled' || status === 'canceled';
   }).sort((a, b) => new Date(b.checkInDate) - new Date(a.checkInDate));
 });
 
 function canCancel(r) {
-  const status = r.reservationStatus?.toLowerCase();
+  const status = getStatusString(r.reservationStatus);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const checkInDate = new Date(r.checkInDate);
   
-  // Can cancel if status is confirmed/pending and check-in is in the future
-  return (status === 'confirmed' || status === 'pending') && checkInDate >= today;
+  // Can cancel if status is confirmed and check-in is in the future
+  return status === 'confirmed' && checkInDate >= today;
 }
 
 function getStatusClass(status) {
-  const s = status?.toLowerCase();
+  const s = getStatusString(status);
   switch(s) {
     case 'confirmed': return 'confirmed';
-    case 'pending': return 'pending';
     case 'cancelled':
     case 'canceled': return 'cancelled';
-    case 'completed': return 'completed';
+    case 'checkedin': return 'confirmed';
+    case 'checkedout': return 'completed';
     default: return 'default';
   }
 }

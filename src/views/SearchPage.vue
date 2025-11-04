@@ -13,19 +13,13 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-// Get tomorrow and day after tomorrow as default dates
-const tomorrow = new Date();
-tomorrow.setDate(tomorrow.getDate() + 1);
-const dayAfterTomorrow = new Date();
-dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
-
 // Only use stored dates if there's an active booking in progress (no reservation completed)
-// If reservation exists or selectedRoom is null, reset to default dates
+// If reservation exists or selectedRoom is null, start with empty dates
 const hasActiveBooking = store.state.booking.selectedRoom && !store.state.booking.reservation;
 
 const guests = ref(store.state.booking.guests || 1);
-const checkInDate = ref(hasActiveBooking ? store.state.booking.checkInDate : formatDate(tomorrow));
-const checkOutDate = ref(hasActiveBooking ? store.state.booking.checkOutDate : formatDate(dayAfterTomorrow));
+const checkInDate = ref(hasActiveBooking ? store.state.booking.checkInDate : '');
+const checkOutDate = ref(hasActiveBooking ? store.state.booking.checkOutDate : '');
 
 // Today's date for min attribute on date pickers
 const today = formatDate(new Date());
@@ -46,13 +40,16 @@ watch(checkInDate, (newCheckIn) => {
 });
 
 watch([guests, checkInDate, checkOutDate], () => {
-  const nights = nightsBetween(checkInDate.value, checkOutDate.value);
-  store.setBooking({
-    guests: guests.value,
-    checkInDate: checkInDate.value,
-    checkOutDate: checkOutDate.value,
-    nights,
-  });
+  // Only update store if dates are actually selected
+  if (checkInDate.value && checkOutDate.value) {
+    const nights = nightsBetween(checkInDate.value, checkOutDate.value);
+    store.setBooking({
+      guests: guests.value,
+      checkInDate: checkInDate.value,
+      checkOutDate: checkOutDate.value,
+      nights,
+    });
+  }
 });
 
 function nightsBetween(a, b) {

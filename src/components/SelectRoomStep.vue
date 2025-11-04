@@ -136,9 +136,29 @@ onMounted(load);
         </select>
       </div>
 
-      <div v-if="loading">Loading rooms...</div>
-      <div v-else-if="error">{{ error }}</div>
-      <div v-else>
+      <div v-if="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading available rooms...</p>
+      </div>
+      <div v-else-if="error" class="error-state">
+        <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <p>{{ error }}</p>
+      </div>
+      <div v-else-if="sortedRooms.length === 0" class="empty-state">
+        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <h3>No Rooms Available</h3>
+        <p>Sorry, there are no rooms available for your selected dates and guest count.</p>
+        <p class="suggestion">Try adjusting your search criteria or selecting different dates.</p>
+        <router-link to="/" class="btn btn-primary text-uppercase">Modify Search</router-link>
+      </div>
+      <div v-else class="rooms-list">
         <RoomCard v-for="room in sortedRooms" :key="room.id || room.roomNumber" :room="room" @book="book" />
       </div>
       
@@ -203,6 +223,104 @@ onMounted(load);
   color: #333;
 }
 
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #f0f0f0;
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Error State */
+.error-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #fff3f3;
+  border: 1px solid #e74c3c;
+  border-radius: 0.5rem;
+  color: #c0392b;
+}
+
+.error-icon {
+  width: 3rem;
+  height: 3rem;
+  stroke: #e74c3c;
+  margin: 0 auto 1rem;
+}
+
+.error-state p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.empty-icon {
+  width: 5rem;
+  height: 5rem;
+  stroke: #ccc;
+  margin: 0 auto 1.5rem;
+}
+
+.empty-state h3 {
+  font-size: 1.75rem;
+  color: #333;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+
+.empty-state p {
+  color: #666;
+  font-size: 1rem;
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.empty-state .suggestion {
+  color: #888;
+  font-size: 0.95rem;
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+
+.empty-state .btn {
+  margin-top: 1rem;
+}
+
+/* Rooms List */
+.rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 /* Rooms toolbar (sort by) */
 .rooms-toolbar {
   margin-bottom: 1.25rem;
@@ -237,6 +355,30 @@ onMounted(load);
   border-color: #e8e3db;
 }
 
+
+/* Button Styles */
+.btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.25rem;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: #000;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #333;
+}
 
 /* Responsive Design */
 @media (max-width: 1200px) {

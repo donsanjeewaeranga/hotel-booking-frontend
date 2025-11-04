@@ -70,6 +70,10 @@ function bookAnother() {
 function printConfirmation() {
   window.print();
 }
+
+function goToDashboard() {
+  router.push('/dashboard');
+}
 </script>
 
 <template>
@@ -179,6 +183,12 @@ function printConfirmation() {
         <div class="confirmation-actions">
           <button
             class="btn btn-primary text-uppercase"
+            @click="goToDashboard"
+          >
+            Manage Bookings
+          </button>
+          <button
+            class="btn btn-secondary text-uppercase"
             @click="bookAnother"
           >
             Book Another Room
