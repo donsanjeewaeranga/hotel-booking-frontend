@@ -412,10 +412,25 @@ const showCancelModal = ref(false);
 const reservationToCancel = ref(null);
 const cancelling = ref(null);
 
-// Helper function to get room image URL
+// Helper function to get room image URL (support multiple possible API shapes)
 function getReservationImage(reservation) {
-  const imgUrl = reservation.imageUrl || reservation.roomType?.imageUrl;
-  return getImageUrl(imgUrl) || `https://picsum.photos/200/150?random=${reservation.reservationId}`;
+  const candidates = [
+    reservation?.imageUrl,
+    reservation?.roomType?.imageUrl,
+    reservation?.roomTypeDetail?.imageUrl,
+    reservation?.room?.roomType?.imageUrl,
+    reservation?.room?.imageUrl,
+    reservation?.roomImageUrl,
+    reservation?.roomTypeImageUrl,
+    reservation?.image, // generic
+    reservation?.room?.image,
+  ];
+
+  const first = candidates.find(Boolean);
+  const resolved = getImageUrl(first);
+  return (
+    resolved || `https://picsum.photos/200/150?random=${reservation?.reservationId || reservation?.roomId || Math.random()}`
+  );
 }
 
 // Helper function to safely get status as lowercase string

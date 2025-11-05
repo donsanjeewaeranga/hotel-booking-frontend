@@ -3,15 +3,34 @@ import { store } from '../store.js';
 // Prefer explicit base from window for dev overrides, then Vite env, then proxy '/api'
 const BASE = (typeof window !== 'undefined' && window.__API_BASE__) || import.meta.env.VITE_API_BASE || '/api';
 
-// Helper to construct full image URL from API-relative path
+// Helper to construct full image URL pointing to S3 bucket, regardless of API host
+// Target format: https://hotel-booking-don.s3.eu-west-1.amazonaws.com/images/standard-room.jpg
+const S3_IMAGE_BASE = 'https://hotel-booking-don.s3.eu-west-1.amazonaws.com';
 export function getImageUrl(imageUrl) {
   if (!imageUrl) return null;
-  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-    return imageUrl; // Already absolute
+
+  // Derive a path from the provided URL or relative path
+  let path = imageUrl;
+  try {
+    // If it's an absolute URL, extract pathname (e.g., "/api/images/foo.jpg" or "/images/foo.jpg")
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      const u = new URL(imageUrl);
+      path = u.pathname || '';
+    }
+  } catch {
+    // Fallback: treat as relative path
+    path = imageUrl;
   }
-  // Remove leading slash if present to avoid double slashes
-  const path = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
-  return `${BASE}/${path}`;
+
+  // Normalize common API prefixes (e.g., "/api/images/..." -> "/images/...")
+  // Remove any leading optional "api/" segment at the start
+  path = path.replace(/^\/?api\//, '/');
+
+  // Ensure leading slash
+  if (!path.startsWith('/')) path = '/' + path;
+
+  // Return S3 URL with normalized path
+  return `${S3_IMAGE_BASE}${path}`;
 }
 
 async function http(path, { method = 'GET', body, auth = false } = {}) {
