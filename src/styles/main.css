@@ -83,6 +83,15 @@ html, body, #app {
     color: #fff;
 }
 
+.hero-section {
+    background: #f0f0f0;
+    padding: 1rem 0;
+    text-align: center;
+    max-width: 100%;
+    height: auto;
+    overflow: hidden;
+}
+
 .nav {
     display: flex;
     gap: 2rem;

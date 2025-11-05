@@ -3,6 +3,17 @@ import { store } from '../store.js';
 // Prefer explicit base from window for dev overrides, then Vite env, then proxy '/api'
 const BASE = (typeof window !== 'undefined' && window.__API_BASE__) || import.meta.env.VITE_API_BASE || '/api';
 
+// Helper to construct full image URL from API-relative path
+export function getImageUrl(imageUrl) {
+  if (!imageUrl) return null;
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl; // Already absolute
+  }
+  // Remove leading slash if present to avoid double slashes
+  const path = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
+  return `${BASE}/${path}`;
+}
+
 async function http(path, { method = 'GET', body, auth = false } = {}) {
   const headers = { 'Content-Type': 'application/json' };
   if (auth && store.state.auth.token) {

@@ -2,24 +2,31 @@
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { store } from "../store.js";
+import SearchHeroImageWebp from "@/assets/images/SearchHeroImageWebp.webp";
+import SearchHeroImageJpg from "@/assets/images/SearchHeroImageJpg.jpg";
 
 const router = useRouter();
 
 // Helper function to get date in YYYY-MM-DD format
 function formatDate(date) {
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
 // Only use stored dates if there's an active booking in progress (no reservation completed)
 // If reservation exists or selectedRoom is null, start with empty dates
-const hasActiveBooking = store.state.booking.selectedRoom && !store.state.booking.reservation;
+const hasActiveBooking =
+  store.state.booking.selectedRoom && !store.state.booking.reservation;
 
 const guests = ref(store.state.booking.guests || 1);
-const checkInDate = ref(hasActiveBooking ? store.state.booking.checkInDate : '');
-const checkOutDate = ref(hasActiveBooking ? store.state.booking.checkOutDate : '');
+const checkInDate = ref(
+  hasActiveBooking ? store.state.booking.checkInDate : ""
+);
+const checkOutDate = ref(
+  hasActiveBooking ? store.state.booking.checkOutDate : ""
+);
 
 // Today's date for min attribute on date pickers
 const today = formatDate(new Date());
@@ -30,9 +37,11 @@ watch(checkInDate, (newCheckIn) => {
     const checkInDateObj = new Date(newCheckIn);
     const nextDay = new Date(checkInDateObj);
     nextDay.setDate(nextDay.getDate() + 1);
-    
+
     // Only update checkout if it's not set or if it's before/equal to the new check-in
-    const currentCheckOut = checkOutDate.value ? new Date(checkOutDate.value) : null;
+    const currentCheckOut = checkOutDate.value
+      ? new Date(checkOutDate.value)
+      : null;
     if (!currentCheckOut || currentCheckOut <= checkInDateObj) {
       checkOutDate.value = formatDate(nextDay);
     }
@@ -68,8 +77,20 @@ function goRooms() {
 </script>
 
 <template>
+  <section class="hero-section">
+    <picture>
+      <source :srcset="SearchHeroImageWebp" type="image/webp" />
+      <img
+        :src="SearchHeroImageJpg"
+        alt="Beautiful Hotel"
+        class="hero-image"
+        width="1000"
+        height="400"
+      />
+    </picture>
+  </section>
   <section id="search">
-  <div class="container">
+    <div class="container">
       <div class="search-section">
         <h2 class="search-title">BOOK A ROOM</h2>
         <form id="searchForm" @submit.prevent="goRooms">
@@ -116,7 +137,14 @@ function goRooms() {
                 </svg>
                 Check In
               </label>
-              <input type="date" id="checkin" class="form-input" v-model="checkInDate" :min="today" required />
+              <input
+                type="date"
+                id="checkin"
+                class="form-input"
+                v-model="checkInDate"
+                :min="today"
+                required
+              />
             </div>
 
             <div class="form-group">
@@ -135,7 +163,14 @@ function goRooms() {
                 </svg>
                 Check Out
               </label>
-              <input type="date" id="checkout" class="form-input" v-model="checkOutDate" :min="checkInDate || today" required />
+              <input
+                type="date"
+                id="checkout"
+                class="form-input"
+                v-model="checkOutDate"
+                :min="checkInDate || today"
+                required
+              />
             </div>
           </div>
 
@@ -205,165 +240,170 @@ function goRooms() {
 
 <style>
 /* Search Section */
+#search .container, .features .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative; 
+}
 .search-section {
-    padding: 0rem 2rem;
-    margin-bottom: 3rem;
+  padding: 0rem 2rem;
+  margin-bottom: 3rem;
 }
 
 .search-title {
-    font-size: 2rem;
-    margin-bottom: 2rem;
-    text-align: center;
-    color: #333;
+  font-size: 2rem;
+  margin: 2rem 0;
+  text-align: center;
+  color: #333;
 }
 
 .search-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .form-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 500;
-    color: #555;
-    font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: #555;
+  font-size: 0.9rem;
 }
 
 .icon {
-    width: 1.2rem;
-    height: 1.2rem;
-    stroke: #333;
+  width: 1.2rem;
+  height: 1.2rem;
+  stroke: #333;
 }
 
 .form-input,
 select.form-input {
-    padding: 0.75rem 1rem;
-    border: 2px solid #e0e0e0;
-    font-size: 1rem;
-    transition: border-color 0.3s;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e0e0e0;
+  font-size: 1rem;
+  transition: border-color 0.3s;
 }
 
 .form-input:focus,
 select.form-input:focus {
-    outline: none;
-    border-color: #000;
+  outline: none;
+  border-color: #000;
 }
 
 .btn {
-    padding: 0.75rem 2rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s;
-    grid-column: 1 / -1;
-    text-transform: uppercase;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  grid-column: 1 / -1;
+  text-transform: uppercase;
 }
 
 .btn-primary {
-    background: #000;
-    color: white;
+  background: #000;
+  color: white;
 }
 
 .btn-primary:hover {
-    background: #333;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  background: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
 .search-form-button {
-    text-align: center;
-    padding-top: 2rem;
+  text-align: center;
+  padding-top: 2rem;
 }
 
 /* Features Section */
 .features {
-    margin: 4rem 0;
-    padding-bottom: 40px
+  margin: 4rem 0;
+  padding-bottom: 40px;
 }
 
 .features-title {
-    text-align: center;
-    font-size: 1.8rem;
-    margin-bottom: 2rem;
-    color: #333;
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  color: #333;
 }
 
 .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
 }
 
 .feature-card {
-    background: white;
-    padding: 2rem;
-    text-align: center;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-    transition: transform 0.3s;
+  background: white;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s;
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
+  transform: translateY(-5px);
 }
 
 .feature-icon {
-    width: 3rem;
-    height: 3rem;
-    stroke: #333;
-    margin-bottom: 1rem;
+  width: 3rem;
+  height: 3rem;
+  stroke: #333;
+  margin-bottom: 1rem;
 }
 
 .feature-card h4 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-    color: #333;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #333;
 }
 
 .feature-card p {
-    color: #666;
-    font-size: 0.95rem;
+  color: #666;
+  font-size: 0.95rem;
 }
 
 @media (max-width: 768px) {
-    .search-section {
-        padding: 0rem 1rem;
-    }
+  .search-section {
+    padding: 0rem 1rem;
+  }
 
-    .search-form {
-        grid-template-columns: 1fr;
-    }
+  .search-form {
+    grid-template-columns: 1fr;
+  }
 
-    .search-title {
-        font-size: 1.5rem;
-    }
+  .search-title {
+    font-size: 1.5rem;
+  }
 
-    .features-grid {
-        grid-template-columns: 1fr;
-    }
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {
-    .search-title {
-        font-size: 1.3rem;
-    }
+  .search-title {
+    font-size: 1.3rem;
+  }
 
-    .features-title {
-        font-size: 1.4rem;
-    }
+  .features-title {
+    font-size: 1.4rem;
+  }
 }
 </style>

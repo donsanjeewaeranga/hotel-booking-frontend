@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useRouter } from 'vue-router';
 import { store } from "../store.js";
+import { getImageUrl } from "../services/api.js";
 
 const router = useRouter();
 
@@ -9,6 +10,11 @@ const booking = computed(() => store.state?.booking || {});
 const selectedRoom = computed(() => booking.value?.selectedRoom || { 
   name: 'Standard Room',
   price: 120
+});
+
+const roomImage = computed(() => {
+  const imgUrl = selectedRoom.value?.imageUrl || selectedRoom.value?.image;
+  return getImageUrl(imgUrl) || 'https://picsum.photos/140/80?random=101';
 });
 
 const contact = computed(() => {
@@ -116,8 +122,7 @@ function goToDashboard() {
         <p class="confirmation-subtitle">
           Total Price for {{ bookingDates.nights }} Night(s):
           <span class="text-uppercase text-bold"
-            >${{ totalAmount }}</span>
-          >
+            >S${{ totalAmount }}</span>
         </p>
 
         <div class="confirmation-booking-summary">
@@ -126,8 +131,8 @@ function goToDashboard() {
               <div class="room-image-info-wrapper">
                 <div class="room-image-wrapper">
                   <img
-                    src="https://picsum.photos/140/80?random=101"
-                    alt="Deluxe Room"
+                    :src="roomImage"
+                    :alt="selectedRoom.name || 'Deluxe Room'"
                     class="summary-image"
                   />
                 </div>
@@ -146,19 +151,18 @@ function goToDashboard() {
                 <div class="package-items">
                   <div class="package-row">
                     <span
-                      >Room (${{ selectedRoom.price || 120 }} ×
+                      >Room (S${{ selectedRoom.price || 120 }} ×
                         {{ bookingDates.nights }} nights)</span
                     >
-                    <span class="package-price">${{ basePrice }}</span>
+                    <span class="package-price">S${{ basePrice }}</span>
                   </div>
                   <div class="package-row">
                     <span>Tax & Service Charges (9%)</span>
-                    <span class="package-price">${{ taxAmount }}</span>
+                    <span class="package-price">S${{ taxAmount }}</span>
                   </div>
                   <div class="package-row total-price text-uppercase">
                     <span>Total Price</span>
-                    <span class="package-price">${{ totalAmount }}</span>
-                    >
+                    <span class="package-price">S${{ totalAmount }}</span>
                   </div>
                 </div>
               </div>

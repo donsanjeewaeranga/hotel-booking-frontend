@@ -106,7 +106,7 @@
                 <div class="reservation-body">
                   <div class="room-info">
                     <div class="room-image">
-                      <img :src="'https://picsum.photos/200/150?random=' + r.reservationId" 
+                      <img :src="getReservationImage(r)" 
                            :alt="'Room ' + r.roomNumber" />
                     </div>
                     <div class="room-details">
@@ -220,7 +220,7 @@
                 <div class="reservation-body">
                   <div class="room-info">
                     <div class="room-image">
-                      <img :src="'https://picsum.photos/200/150?random=' + r.reservationId" 
+                      <img :src="getReservationImage(r)" 
                            :alt="'Room ' + r.roomNumber" />
                     </div>
                     <div class="room-details">
@@ -312,7 +312,7 @@
                 <div class="reservation-body">
                   <div class="room-info">
                     <div class="room-image">
-                      <img :src="'https://picsum.photos/200/150?random=' + r.reservationId" 
+                      <img :src="getReservationImage(r)" 
                            :alt="'Room ' + r.roomNumber" />
                     </div>
                     <div class="room-details">
@@ -401,7 +401,7 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue';
 import { store } from '../store.js';
-import { Api } from '../services/api.js';
+import { Api, getImageUrl } from '../services/api.js';
 
 const auth = store.state.auth;
 const reservations = ref([]);
@@ -411,6 +411,12 @@ const activeTab = ref('upcoming');
 const showCancelModal = ref(false);
 const reservationToCancel = ref(null);
 const cancelling = ref(null);
+
+// Helper function to get room image URL
+function getReservationImage(reservation) {
+  const imgUrl = reservation.imageUrl || reservation.roomType?.imageUrl;
+  return getImageUrl(imgUrl) || `https://picsum.photos/200/150?random=${reservation.reservationId}`;
+}
 
 // Helper function to safely get status as lowercase string
 function getStatusString(reservationStatus) {

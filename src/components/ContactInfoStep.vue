@@ -164,7 +164,7 @@
 
           <div v-if="selRoom" class="room-summary">
             <div class="room-image-wrapper">
-              <img :src="selRoom.image || 'https://picsum.photos/400/300?random=101'" 
+              <img :src="roomImage" 
                    :alt="selRoom.name" 
                    class="summary-image">
             </div>
@@ -175,16 +175,16 @@
 
           <div class="price-summary">
             <div class="price-row">
-              <span>${{ selRoom?.price || '120' }} × {{ store.state.booking.nights }} night(s)</span>
-              <span>${{ basePrice }}</span>
+              <span>S${{ selRoom?.price || '120' }} × {{ store.state.booking.nights }} night(s)</span>
+              <span>S${{ basePrice }}</span>
             </div>
             <div class="price-row">
               <span>Taxes & Service Charges(9%)</span>
-              <span>${{ taxAmount }}</span>
+              <span>S${{ taxAmount }}</span>
             </div>
             <div class="price-row total text-uppercase">
               <span>Total</span>
-              <span>${{ totalPrice }}</span>
+              <span>S${{ totalPrice }}</span>
             </div>
           </div>
         </div>
@@ -196,9 +196,13 @@
 <script setup>
 import { computed, reactive, ref, onMounted } from "vue";
 import { store } from "../store.js";
-import { Api } from "../services/api.js";
+import { Api, getImageUrl } from "../services/api.js";
 
 const selRoom = computed(() => store.state.booking.selectedRoom);
+const roomImage = computed(() => {
+  const imgUrl = selRoom.value?.imageUrl || selRoom.value?.image;
+  return getImageUrl(imgUrl) || 'https://picsum.photos/400/300?random=101';
+});
 // Initialize contact from booking state; will be overwritten if user is logged in
 const contact = reactive({ 
   title: store.state.booking.contact?.title || 'Mr',
@@ -517,7 +521,7 @@ async function doRegisterInModal() {
 /* Booking Summary */
 .booking-summary {
   background: #f8f5f0;
-  padding: 1.5rem;
+  padding:  1.5rem 1.8rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   height: fit-content;
   position: sticky;
@@ -528,6 +532,7 @@ async function doRegisterInModal() {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  max-width: 340px;
 }
 
 .booking-details {
@@ -555,12 +560,11 @@ async function doRegisterInModal() {
   margin: 0 0.5rem;
 }
 
-.room-image-wrapper {
-  width: 100%;
-}
 
 .summary-image {
   width: 100%;
+  max-width: 340px;
+  max-height: 210px;
   height: auto;
   object-fit: cover;
 }

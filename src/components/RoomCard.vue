@@ -1,7 +1,7 @@
 <template>
   <div class="room-card">
     <div class="room-image">
-      <img :src="room.imageUrl || 'https://picsum.photos/340/210?random=101'" :alt="roomName" />
+      <img :src="roomImage" :alt="roomName" />
       <span v-if="room.isAvailable" class="room-badge">Available</span>
     </div>
     <div class="room-content">
@@ -16,66 +16,22 @@
           <span>{{ room.rating }}</span>
         </div>
       </div>
-      <p class="room-subtitle text-uppercase" v-if="room.roomType?.name">{{ room.roomType.name }}</p>
+     <!-- Dynamic features placed right after the title/subtitle -->
+      <div class="room-features">
+        <span class="feature-tag" v-if="capacity">
+          {{ capacity }} {{ capacity === 1 ? 'Guest' : 'Guests' }}
+        </span>
+        <span
+          v-for="f in room.features || []"
+          :key="f.roomFeatureId || f.featureName"
+          class="feature-tag"
+        >
+          {{ f.featureName }}
+        </span>
+      </div>
       <p class="room-description">
         {{ room.description || room.roomType?.description || 'Comfortable room with modern amenities.' }}
       </p>
-      <div class="room-features">
-        <span class="feature-tag" v-if="capacity">
-          <svg
-            class="feature-icon-small"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-          {{ capacity }} {{ capacity === 1 ? 'Guest' : 'Guests' }}
-        </span>
-        <span class="feature-tag">
-          <svg
-            class="feature-icon-small"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <rect x="3" y="4" width="18" height="18" rx="2" />
-            <path d="M3 8h18" />
-          </svg>
-          Free WiFi
-        </span>
-        <span class="feature-tag" v-if="room.roomType?.hasBreakfast || room.hasBreakfast">
-          <svg
-            class="feature-icon-small"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <path d="M16 10a4 4 0 0 1-8 0" />
-          </svg>
-          Breakfast Included
-        </span>
-        <span class="feature-tag">
-          <svg
-            class="feature-icon-small"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <rect x="3" y="11" width="18" height="11" rx="2" />
-            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-          </svg>
-          AC
-        </span>
-      </div>
     </div>
     <div class="room-pricing">
       <div class="room-price">
@@ -95,6 +51,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { getImageUrl } from '../services/api.js';
 
 const props = defineProps({
   room: {
@@ -106,10 +63,10 @@ const props = defineProps({
 const emit = defineEmits(["book"]);
 
 const roomName = computed(() => {
-  return props.room.name || 
-         props.room.roomType?.name || 
-         `Room ${props.room.roomNumber || ''}` || 
-         'Standard Room';
+  const rn = props.room.roomNumber || '';
+  const type = props.room.roomType?.typeName || props.room.roomType?.name || '';
+  const combined = [rn, type].filter(Boolean).join(' ');
+  return combined || 'Standard Room';
 });
 
 const displayPrice = computed(() => {
@@ -120,9 +77,12 @@ const displayPrice = computed(() => {
 });
 
 const capacity = computed(() => {
-  return props.room.capacity || 
-         props.room.roomType?.capacity || 
-         null;
+  return props.room.roomType?.capacity ?? null;
+});
+
+const roomImage = computed(() => {
+  const imgUrl = props.room.roomType?.imageUrl || props.room.imageUrl;
+  return getImageUrl(imgUrl) || 'https://picsum.photos/340/210?random=101';
 });
 
 function handleBook() {

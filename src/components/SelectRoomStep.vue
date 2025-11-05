@@ -51,13 +51,14 @@ function normalizeRoom(room) {
   const name = room?.name ?? room?.roomType?.name ?? (roomNumber ? `Room ${roomNumber}` : 'Room');
   const price = room?.price ?? room?.roomType?.basePrice ?? 120;
   const capacity = room?.capacity ?? room?.roomType?.capacity ?? null;
+  const imageUrl = room?.roomType?.imageUrl ?? room?.imageUrl ?? room?.image ?? null;
   return {
     id,
     roomNumber,
     name,
     price,
     capacity,
-    image: room?.image || null,
+    imageUrl,
     raw: room
   };
 }
